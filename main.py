@@ -6,8 +6,9 @@ def get_pixels(img_path, resize=1.0):
     with open(img_path, "rb") as fin:
         img = Image.open(fin)
         w, h = img.size
-        img.thumbnail((h * resize, w * resize), Image.ANTIALIAS)
-        return np.asarray(img)
+        rgb = img.convert("RGB")
+        rgb.thumbnail((h * resize, w * resize), Image.ANTIALIAS)
+        return np.asarray(rgb)
 
 
 def get_as_ascii(img_path, scale):
