@@ -12,8 +12,7 @@ def get_sorted_weights():
             char_code = int(line)
             ch = chr(char_code)
             lines.append(ch)
-
-    return lines
+        return lines
 
 
 def get_pixels(img_path, resize=1.0):
@@ -24,30 +23,27 @@ def get_pixels(img_path, resize=1.0):
         return np.asarray(img)
 
 
+def format_color(text, r, g, b):
+    ENDING_SEQ = "\x1b[0m"
+    start = f"\u001b[38;2;{r};{g};{b}m"
+    return start + text + ENDING_SEQ
+
 def get_as_ascii(img_path, scale):
     DENSITY = get_sorted_weights()
     DENSITY_LEN = len(DENSITY)
     lines = []
     pixels = get_pixels(img_path, resize=scale)
     for row in pixels:
-        line = []
+        line = ""
         for pixel in row:
             r, g, b, a = pixel.astype(np.uint16) / 255
             brightness = (r + g + b) / 3 * a
             idx = round(brightness * (DENSITY_LEN - 1))
             ch = DENSITY[idx]
-            line.append(ch)
+            line += format_color(ch + "\t".expandtabs(1), *pixel[:3])
         lines.append(line)
 
-    ret = []
-    for line in lines:
-        l = ""
-        for ch in line:
-            s = ch
-            l += s + "\t".expandtabs(1)
-        ret.append(l)
-
-    return "\n".join(ret)
+    return "\n".join(lines)
 
 
 if __name__ == "__main__":
@@ -72,7 +68,6 @@ if __name__ == "__main__":
         nargs="?",
     )
     args = vars(parser.parse_args())
-    print(args)
     img_path = args["path"]
     scale = args["scale"]
     art = get_as_ascii(img_path, scale=scale)
